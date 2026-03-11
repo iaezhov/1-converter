@@ -6,13 +6,16 @@ import (
 )
 
 const (
-	USDToEUR = 0.92
-	USDToRUB = 76.64
-
 	CurrencyUSD = "USD"
 	CurrencyEUR = "EUR"
 	CurrencyRUB = "RUB"
 )
+
+var ratesToUSD = map[string]float64{
+	CurrencyUSD: 1.0,
+	CurrencyEUR: 0.92,
+	CurrencyRUB: 76.64,
+}
 
 func main() {
 	initialCurrency := getInitialCurrency()
@@ -81,13 +84,13 @@ func getCurrencyAmount() float64 {
 }
 
 func validateCurrency(currency, initialCurrency string) (bool, error) {
-	isValid := currency == CurrencyEUR || currency == CurrencyUSD || currency == CurrencyRUB
+	_, exists := ratesToUSD[currency]
 
-	if !isValid {
+	if !exists {
 		return false, errors.New("неподдерживаемый тип валюты")
 	}
 
-	if isValid && initialCurrency == currency {
+	if initialCurrency == currency {
 		return false, errors.New("валюта должна отличаться от исходной")
 	}
 
@@ -95,27 +98,11 @@ func validateCurrency(currency, initialCurrency string) (bool, error) {
 }
 
 func convertCurrency(count float64, currencyFrom string, currencyTo string) float64 {
-	var inUSD float64
+	// Конвертируем в USD
+	inUSD := count / ratesToUSD[currencyFrom]
 
-	switch currencyFrom {
-	case CurrencyUSD:
-		inUSD = count
-	case CurrencyEUR:
-		inUSD = count / USDToEUR
-	case CurrencyRUB:
-		inUSD = count / USDToRUB
-	}
-
-	switch currencyTo {
-	case CurrencyUSD:
-		return inUSD
-	case CurrencyEUR:
-		return inUSD * USDToEUR
-	case CurrencyRUB:
-		return inUSD * USDToRUB
-	}
-
-	return 0
+	// Конвертируем из USD в целевую валюту
+	return inUSD * ratesToUSD[currencyTo]
 }
 
 func outputResult(value float64) {
