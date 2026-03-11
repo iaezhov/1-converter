@@ -21,7 +21,7 @@ func main() {
 	initialCurrency := getInitialCurrency()
 	currencyAmount := getCurrencyAmount()
 	currentCurrency := getCurrentCurrency(initialCurrency)
-	result := convertCurrency(currencyAmount, initialCurrency, currentCurrency)
+	result := convertCurrency(currencyAmount, initialCurrency, currentCurrency, &ratesToUSD)
 	outputResult(result)
 }
 
@@ -97,12 +97,12 @@ func validateCurrency(currency, initialCurrency string) (bool, error) {
 	return true, nil
 }
 
-func convertCurrency(count float64, currencyFrom string, currencyTo string) float64 {
+func convertCurrency(count float64, currencyFrom string, currencyTo string, ratesPointer *map[string]float64) float64 {
 	// Конвертируем в USD
-	inUSD := count / ratesToUSD[currencyFrom]
+	inUSD := count / (*ratesPointer)[currencyFrom]
 
 	// Конвертируем из USD в целевую валюту
-	return inUSD * ratesToUSD[currencyTo]
+	return inUSD * (*ratesPointer)[currencyTo]
 }
 
 func outputResult(value float64) {
